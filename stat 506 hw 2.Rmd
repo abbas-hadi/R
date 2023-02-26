@@ -1,0 +1,165 @@
+---
+title: "stat 506 hw 2"
+author: "Hadi Abbas"
+date: "9/7/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+library(psych)
+library(dplyr)
+library(freqdist)
+library(DescTools)
+library(car)
+library(ggplot2)
+```
+
+```{r}
+#8
+real_estate <- read.csv("C:/Users/rab4h/Downloads/real_estate.csv")
+
+print(str(real_estate))
+
+print(mean(real_estate$Price)) #357026.5
+print(SD(real_estate$Price)) #160700.1
+
+#Using the mean and SD, an estimate for the number of homes selling for more than $500,000 is approximately 18.68% assuming a normal distribution.
+
+#abovemeanprice <- (subset(real_estate$price>=mean(real_estate$Price)))
+
+#Finish part b
+
+
+#Under a normal distribution, approximately half (or 52.5) of the houses should be selling for prices above the mean. Since the actual number is 
+
+
+
+bins <- seq(0,1000000,by=10000)
+pricefreq <- cut(real_estate$Price, bins) 
+print(freqdist(pricefreq))
+
+```
+```{r}
+#9
+real_estate$PricePerBed <- real_estate$Price/real_estate$Bedrooms
+real_estate$PricePerBath <- real_estate$Price/real_estate$Baths
+
+print(describe(real_estate$PricePerBed))
+print(describe(real_estate$PricePerBath))
+
+```
+```{r}
+#10
+#a
+print(mean(real_estate$Price))
+print(160700.1*104/105) 
+
+#b
+real_estate_smp<-slice_sample(real_estate, n=30)
+print(mean(real_estate_smp$Price)) #387604
+print(SD(real_estate_smp$Price)) #195846.5
+```
+```{r}
+#11
+print(scatterplot(PricePerBed ~ PricePerBath, data=real_estate,
+   xlab="Price per Bathroom", ylab="Price per Bedroom",
+   main="Price per bathroom and Price per bedroom",
+   ))
+print(scatterplot(Years ~ FICO, data=real_estate,
+   xlab="FICO", ylab="Years",
+   main="FICO and Years",
+   ))
+
+# Price per bathroom and price per bathroom appear to be strongly correlated, which appears to make sense given both have positive impacts on how valuable a house is.
+# FICO and years appear to have less correlation, but there still might be some general positive trend between the two.
+```
+
+
+```{r}
+#12
+#real_estate_sub = real_estate %>% 
+  
+
+```
+
+
+```{r}
+#13
+buses <- read.csv("C:/Users/rab4h/Downloads/buses.csv")
+print(mean(buses$Maintenance.cost))
+print(SD(buses$Maintenance.cost))
+
+
+print(freqdist(buses$Maintenance.cost))
+print(hist(buses$Maintenance.cost))
+```
+
+
+```{r}
+#14
+print(ggplot(buses, aes(x=Maintenance.cost, y=Engine.Type)) + 
+  geom_boxplot(notch=TRUE))
+
+#Gasoline engines tend to have a higher maintenance cost than their diesel counterparts. Even the upper quartile of the latter is below the mean of the former.
+```
+
+
+```{r}
+#15
+state<-data.frame(state.x77)
+print(str(state))
+```
+```{r}
+
+
+```
+
+```
+
+```{r}
+#16
+
+state$row.names <- row.names(state) 
+colnames(state)[9] <- "StateName"
+```
+```{r}
+#17
+
+region <- data.frame(state.region)
+statewreg <- bind_cols(state, region)
+```
+```{r}
+#18
+
+statewreg[order(statewreg$Murder, decreasing = TRUE), ]
+print(head(statewreg[order(statewreg$Murder, decreasing = TRUE), ]), 10)
+```
+```{r}
+
+```
+

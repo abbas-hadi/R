@@ -1,0 +1,242 @@
+---
+title: "Homework 1"
+author: "Hadi Abbas"
+date: "8/31/2022"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+library(psych)
+library(dplyr)
+library(freqdist)
+library(DescTools)
+library(car)
+
+```
+
+
+## A. Analysis of the 2008 General Social Survey Dataset 
+
+```{r}
+gss2008 <- read.csv("C:/Users/rab4h/Downloads/gss2008.csv")
+```
+15.
+```{r}
+```
+
+
+```{r}
+setwd("C:/Users/rab4h/Downloads")
+```
+```{r}
+getwd()
+```
+```{r}
+gss <- read.csv("gss2008.csv")
+```
+
+17.
+```{r}
+print(str(gss))
+```
+
+
+```{r}
+print(head(gss, 10))
+```
+
+
+```{r}
+print(tail(gss, 10))
+```
+18.
+```{r}
+print(describe(gss))
+```
+```{r}
+print(summary(gss))
+```
+```{r}
+print(var(gss$CHILDS))
+print(var(gss$EDUC))
+print(Mode(gss$CHILDS))
+print(Mode(gss$EDUC))
+```
+19.
+```{r}
+bins <- seq(0,100,by=10)
+agefreq <- cut(gss$AGE, bins) 
+freqdist(agefreq)
+```
+The variable appears to be fairly normally distributed with high frequency values in the middle and lower amounts in the tails.
+```{r}
+bins <- seq(-.99,22,by=2)
+educfreq <- cut(gss$EDUC, bins) 
+print(freqdist(educfreq))
+```
+This variable has a heavier distribution between 11 and 17. Still, it is fairly normally distributed but shifted to the right.
+
+20.
+```{r}
+print(hist(gss$SEI))
+print(hist(gss$HAPMAR))
+print(hist(gss$LIFE))
+```
+Those who responded are generally lower income or middle income socioeconomically. 
+Most people who responded are either not married or are very happy with their marriages. Very few are unhappy with their marriages.
+About only 2% of people described themselves as having dull lives.
+
+21.
+```{r}
+print(hist(gss$EDUC, breaks = 20, col = "blue", main="Years of Education", xlab="Number of Years"))
+```
+The most common level of education is the completion of high school (12 years). 16 (Bachelor's degree) and 14 (Associate's degree) are the next most frequent levels.
+
+22.
+```{r}
+print(boxplot(gss$CHILDS, col = "green", main = "Boxplot for Number of Children", xlab = "Number of Children"))
+
+print(boxplot(gss$HRS1, col = "blue", main = "Boxplot for Number of Hours Worked in the Previous Week", xlab = "Number of Hours"))
+```
+The median number of children the respondents have is 2.Three quarters of the respondents have 3 children or less.
+
+The median number of hours worked by a respondent is 40. The middle half of respondents fall in the range of around 38 to 50 hours.
+
+23.
+```{r}
+print(scatterplot(PRESTG80 ~ SEI, data=gss,
+   xlab="Socioeconomic Index Score", ylab="Occupational Prestige Index Score 1980",
+   main="Socioeconomic Status and Occupational Prestige",
+   ))
+```
+There is a clear positive correlation between the two factors, which seems to make logical sense. 
+The relationship appears fairly strong, although there does appear to be some slight outliers. In general, higher prestige of occupation corresponds with a higher socioeconomic status.
+
+24.
+```{r}
+gss$PRESTG80 <- as.numeric(gss$PRESTG80)
+gss$SEI <- as.numeric(gss$SEI)
+#gssnew <- c(gss, mutate(SEI_PREST <- gss$PRESTG80 + gss$SEI))
+```
+
+
+25.
+```{r}
+setwd("C:/Users/rab4h/Downloads")
+schools <- read.csv("schools.csv")
+```
+
+26.
+```{r}
+print(describe(schools))
+```
+The number of money being spent on each pupil (Instruct) indicates an average of $2,724.61. However, this has great variance due to a standard deviation of 1095.22. Also, since the median is smaller than the mean, the spending is top heavy and not normally distributed. There is also a positive skew which is fairly large. The standard error is also almost 113.
+
+For Passing (% passing to next grade level), the mean and median are fairly similar and only separated by 1.14 percentage points. A standard deviation of 13.61 is very large and indicates that many districts near the center of the distribution are sending barely more than half of their students to the next grade level. There is a slight negative skew and somewhat larger standard error. 
+
+27.
+```{r}
+Amtpp.z <- (schools$Instruct - mean(schools$Instruct))/sd(schools$Instruct)
+InstructZscores <- data.frame(schools$Instruct, Amtpp.z)
+print(head(InstructZscores, 10))
+```
+```{r}
+print(describe (InstructZscores))
+print(sum(InstructZscores$Amtpp.z))
+```
+The average z-score is 0.00, but the median is -0.2. This indicates there is a rightward skew in the data. The range is very large and the maximum value has an absolute value difference of 7.76 from the mean where as the minimum value has one of only 0.74. Therefore, there is at least one very large outlier. The overall sum is also negative, which illustrates that all of the negative values added up outweigh the positive outliers.
+
+28.
+```{r}
+print(sd(schools$Salary))
+print(sd(schools$Salary)/sqrt(94))
+```
+The standard error is smaller because it is the standard deviation divided by the square root of the sample size.
+
+29.
+```{r}
+print(hist(schools$Attend, breaks = 20, col = "green", main="School Attendance Rate", xlab="Percentage"))
+
+print(hist(schools$Property, breaks = 20, col = "blue", main="Property Values", xlab="Amount ($)"))
+
+print(boxplot(schools$Attend, col = "green", main="School Attendance Rate", xlab="Percentage"))
+
+print(boxplot(schools$Property, col = "blue", main="Property Values", xlab="Amount ($)"))
+```
+Both of these do appear to be normally distributed. There is a lower tail and a general upward peak followed by a decline in the frequencies. School attendance does appear to be normally distributed than property values.
+
+30.
+```{r}
+print(scatterplot(Welfare ~ Instruct, data=schools,
+   xlab="Amount spent per pupil in dollars", ylab="Percentage of families receiving welfare",
+   main="Welfare and School District Spend",
+   ))
+```
+There does not appear to be any correlation between the two variables. This means that school district spend is not necessarily higher or lower in low-income areas than higher-income areas. Alternatively, areas spending less on students do not have too many school districts that have more than 20% of families on welfare.
+
+31.
+```{r}
+schools.low <- (subset(schools, schools$Salary <= median(schools$Salary)))
+schools.high <- (subset(schools, schools$Salary > median(schools$Salary)))
+schools.low <- select(schools.low, c("Students", "Instruct", "Welfare", "Salary", "Attend", "Passing"))
+schools.high <- select(schools.high, c("Students", "Instruct", "Welfare", "Salary", "Attend", "Passing"))
+print(str(schools.low))
+print(str(schools.high))
+print(head(schools.low), 6)
+print(head(schools.high), 6)
+```
+32.
+```{r}
+print(describe(schools.low))
+print(describe(schools.high))
+```
+33.
+```{r}
+print(scatterplot(Welfare ~ Instruct, data=schools.low,
+   xlab="Amount spent per pupil in dollars", ylab="Percent of families receiving welfare",
+   main="Welfare and District Spend in Low Income Districts",
+   ))
+print(scatterplot(Welfare ~ Instruct, data=schools.high,
+   xlab="Amount spent per pupil in dollars", ylab="Percent of families receiving welfare",
+   main="Welfare and District Spend in High Income Districts",
+   ))
+```
+There does appear to be a positive relationship here between spend and welfare in the low income subset and a negative correlation in the higher income subsetted data. Splitting the data in this manner allowed for more interesting conclusions than just looking at the full dataset as is. 
+
+34.
+```{r}
+PropvStud <- schools$Property/schools$Students
+schools <- cbind(schools, PropvStud)
+#rich.schools <- filter(schools,schools$PropvStud > mean(schools$PropvStud))
+#rich.schools <- select(rich.schools, c("PropVStud", "Students", "Property", "Salary", "Instruct", "Passing"))
+#print(describe(rich.schools))
+```
+

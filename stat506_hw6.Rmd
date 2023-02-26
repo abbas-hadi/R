@@ -1,0 +1,243 @@
+---
+title: "SPCN V506 Homework Exercise 6"
+author: "Author(s): Gangaprasad Shahapurkar, Logan Mcguire, Hadi Abbas"
+date: "`r Sys.Date()`"
+output: 
+  word_document:
+    toc: true
+    toc_depth: 3
+    number_section: false
+knit: (function(input, ...) {
+  rmarkdown::render(
+    input,
+    output_file = paste0(
+      xfun::sans_ext(basename(input)), '-', Sys.Date(), '.doc'
+    ),
+    output_dir = here::here("output"),
+    envir = globalenv()
+    )
+  })
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE, 
+                      message = FALSE,
+                      tidy = TRUE)
+```
+
+```{r}
+if(!require('pacman')) {
+  install.packages('pacman')
+  library('pacman')
+  pacman::p_load(pacman, Rmisc, dplyr, DescTools, car, ggplot2, psych, sjstats, 
+                 rmarkdown, freqdist, readxl, foreign, here, formatR)
+}
+```
+
+### **Problem  2**
+
+```{r}
+root_dir <- here::here()
+file_mutualfunds <- file.path(root_dir,"data","MutualFund.csv")
+mutualFunds <- read.csv(file_mutualfunds)
+str(mutualFunds)
+```
+
+(a)
+HO: The slope in the regression equation <= 0
+H1: The slope in the regression equation > 0
+
+Significance = 0.01
+T-statistic (One-tailed)
+Degrees of Freedom = n-2 = 34-2 = 32
+Critical value = 2.449
+
+```{r}
+lmMF <- lm(exp_rtrn ~ sd_rtrn, data=mutualFunds)
+summary.lm(lmMF)
+```
+Expected Return = 5.54094 + 0.47451*SD return
+t = (b-0)/SE(b) = 0.475/0.055 = 8.616 > 2.449
+
+We reject the null hypothesis and conclude that there is a significant relationship between expected return and risk at the 0.01 significance level. The p-value is 7.605e-10/2 < 0.01, further indicating why we should reject the null. The R squared value of 0.6983 indicates the percentage of the variation in expected return that can be explained by the independent variable, in this case the standard deviation of risk.
+
+(b)
+```{r}
+library(ggplot2)
+ggplot(data = mutualFunds, aes(x = sd_rtrn, y = exp_rtrn)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") +
+  labs(x = "Risk (SD)", y = "Expected Return", title = "Expected Return vs Risk")
+
+```
+
+```{r}
+par(mfrow=c(2,2)) 
+plot(lmMF)
+```
+
+Residuals vs Fitted: This plot illustrates that most of the points are very close to the horizontal axis of zero with very few more than 2 residuals away in either direction. Thus, this likely satisfies assumptions for linearity.
+
+Normal Q-Q: This plot contains nearly all of the points on the line, which indicates a normal probability distribution and satisfaction of homoscedasticity necessary for linearity.
+
+Scale_location: This plot illustrates constant variation about the regression line.
+
+Residuals vs Leverage: This plot indicates very few, if any, outlier data points. 
+
+(c)
+
+```{r}
+library(dplyr)
+mutualFunds <- mutualFunds %>%
+  mutate(lnsd_rtrn = log(sd_rtrn))
+head(mutualFunds, 5)
+```
+
+```{r}
+lmLF <- lm(exp_rtrn ~ lnsd_rtrn, data=mutualFunds)
+summary(lmLF)
+```
+-8.0555 + 7.7366x is the new regression equation, where -8.0555 is the y-intercept and 7.7366 is the slope. The determination coefficient has increased from 0.6988 to 0.7129, indicating a larger amount of variance is accounted for by variation in the return. There is a very high positive correlation coefficient.
+
+(d)
+
+```{r}
+par(mfrow=c(2,2))
+plot(lmLF)
+```
+
+Residuals vs Fitted: This plot illustrates that most of the points are very close to the horizontal axis of zero with very few more than 2 residuals away in either direction. Thus, this likely satisfies assumptions for linearity.
+
+Normal Q-Q: This plot contains nearly all of the points on the line, which indicates a normal probability distribution and satisfaction of homoscedasticity necessary for linearity.
+
+Scale-Location: This plot indicates that variation about the regression line is constant for most values.
+
+Residuals vs Leverage: This plot indicates there are very few, if any, outlier data points.
+
+```{r}
+library(ggplot2)
+ggplot(data = mutualFunds, aes(x = lnsd_rtrn, y = exp_rtrn)) + geom_point() + geom_smooth(method = "lm") +
+    labs(x = "Log Risk (SD)", y = "Expected Return", title = "Expected Return vs Log Risk")
+```
+(e)
+The second model that involves the logarithmic transformation of the risk variable appears to have greater accuracy in predicting the expected return due to a higher adjusted R squared value and coefficient determination. Furthermore, this model also provides a lower residual standard error.
+
+
+### **Problem  3**
+
+```{r}
+fileRealEstate <- file.path(root_dir,"data","real_estate.csv")
+real_estate <- read.csv(fileRealEstate)
+str(real_estate)
+```
+
+
+(a)
+HO: The slope in the regression equation >= 0
+H1: The slope in the regression equation < 0
+
+Significance = 0.05
+T-statistic (One-tailed)
+Degrees of Freedom = n-2 = 105-2 = 103
+Critical value = 1.660
+
+```{r}
+lmRE <- lm(Price ~ Size, data=real_estate)
+summary.lm(lmRE)
+```
+t = 31.41 > 1.66, reject the null hypothesis
+Price = -15775.884 + 108.364*Size
+-15775.884 is the y-intercept and 108.364 is the slope of the line. The multiple R squared value suggest that 90.54% of the variation of price is due to variation in the independent variable, in this case home size. The correlation coefficient is 0.95, which suggest a very strong positive relationship. The residual standard error is relatively small in this situation at $49,660.
+
+This model predicts the sale price of a home where size equals 2,200 is $222,624.90
+
+(b)
+HO: The slope in the regression equation >= 0
+H1: The slope in the regression equation < 0
+
+Significance = 0.05
+T-statistic (One-tailed)
+Degrees of Freedom = n-2 = 105-2 = 103
+Critical value = 1.660
+
+```{r}
+lmRE2 <- lm(Days~ Price, data=real_estate)
+summary.lm(lmRE2)
+```
+t = 1.909 > 1.66, reject the null hypothesis
+Days = 25.453 +0.000011589 * Price
+25.453 is the y-intercept and 0.000011589 is the slope of the line. The multiple R squared value suggests that only 3.416% of the variation of days is due to variation in the independent variable, in this case price. The correlation coefficient is 0.16, which suggests a relatively weak positive relationship. The residual standard error is 9.95 days.
+
+This model predicts the days on the market of a home that is worth $300,000 to be 29 days.
+
+(c)
+The previous regression summaries and statistical hypothesis tests conducted in parts (a) and (b) of this exercise indicate that there is a strong relationship between size and price but a very weak correlation between price and days on the market. This conclusion is further reflected by the values for residual standard error and multiple R squared in the two different analyses.
+
+
+### **Problem  4**
+
+```{r}
+fileBikeShare <- file.path(root_dir,"data","BikeShare.csv")
+bikeshare <- read.csv(fileBikeShare)
+str(bikeshare)
+```
+
+(a)
+```{r}
+lmBikeShare <- lm(cnt ~ t1, data = bikeshare)
+summary(lmBikeShare)
+```
+The regression equation is Bike Shares = 1400.553 + 80.434*temperature.
+
+An increase of 1 in temperature will result in an increase of 80.434 in the value of bike shares.
+
+Multiple R-squared is 15.92%, which indicates the variation of bike share due to variation in real temperature (Celsius). r = 0.39, illustrating relatively weak positive correlation. The residual standard error is 1092, which is pretty large.
+
+(b)
+HO: The slope in the regression equation = 0
+H1: The slope in the regression equation != 0
+
+Significance = 0.05
+T-statistic (Two-tailed)
+Degrees of Freedom = n-2 = 3572-2 = 3570
+Critical value = 1.960
+
+t = 26.00 > 1.960, Reject the null hypothesis and conclude that the slope in the regression equation is not zero and, by extension, that there is a relationship between real temperature and bike shares.
+
+(c)
+```{r}
+library(ggplot2)
+ggplot(data = lmBikeShare, aes(x = t1, y = cnt)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+    labs(x = "Real Temperature (Celcius)", y = "Number of New Bike Shares", title = "New Bike Shares vs Real Temperature")
+
+```
+
+(d)
+```{r}
+par(mfrow=c(2,2))
+plot(lmBikeShare)
+
+```
+Residuals vs Fitted: This plot illustrates that most of the points are close to the horizontal axis. Thus, this likely satisfies assumptions for linearity. However, the points do seem to be relatively undistributed.
+
+Normal Q-Q: This plot contains nearly all of the points on the line, which indicates a normal probability distribution and satisfaction of homoscedasticity necessary for linearity.
+
+Scale-Location: This plot indicates that variation about the regression line is constant for most values.
+
+Residuals vs Leverage: This plot indicates there are very few, if any, outlier data points.
+
+(e)
+For a temperature of 34 degrees, our model predicts the number of bike shares to be 4376.6.
+
+```{r}
+library(ggplot2)
+
+ggplot(data = lmBikeShare, aes(x = t1)) + geom_boxplot() +
+  stat_boxplot(geom = "errorbar",
+    width = 0.05) + theme(legend.position = "none") + labs(x = "Real Temperature (Celcius)", title = "Real Temperature")
+
+```
+34 is an outlier as all values above 29 are considered to be so given the boxplot of the real temperature variable. Consequently, our regression model's estimate may not be accurate here and additional factors will need to be considered.

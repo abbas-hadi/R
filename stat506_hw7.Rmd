@@ -1,0 +1,307 @@
+---
+title: "SPCN V506 Homework Exercise 7"
+author: "Author(s): Gangaprasad Shahapurkar, Logan Mcguire, Hadi Abbas"
+date: "`r Sys.Date()`"
+output: 
+  word_document:
+    toc: true
+    toc_depth: 3
+    number_section: false
+knit: (function(input, ...) {
+  rmarkdown::render(
+    input,
+    output_file = paste0(
+      xfun::sans_ext(basename(input)), '-', Sys.Date(), '.doc'
+    ),
+    output_dir = here::here("output"),
+    envir = globalenv()
+    )
+  })
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = TRUE, 
+                      message = FALSE,
+                      tidy = TRUE)
+```
+
+```{r}
+if(!require('pacman')) {
+  install.packages('pacman')
+  library('pacman')
+  pacman::p_load(pacman, Rmisc, dplyr, DescTools, car, ggplot2, psych, sjstats, 
+                 rmarkdown, freqdist, readxl, foreign, here, formatR)
+}
+```
+
+### **Problem  1**
+
+
+```{r}
+root_dir <- here::here()
+file_problem1 <- file.path(root_dir,"data","hw7_ex1.csv")
+problem1 <- read.csv(file_problem1)
+str(problem1)
+```
+
+a)
+
+```{r}
+lmTrips <- lm(Total.Person.Trips ~ Linear.distance.to.the.cbd + number.of.autos.owned, data=problem1)
+summary.lm(lmTrips)
+```
+
+b)
+
+The parameter estimate for distance to the CBD is -10.122, which means that all else constant, for every increase in distance by 1 mile, the number of total person trip reduces by 10,122. Similarly, all else constant, an increase in number of autos owned by 1,000 will increase the number of total person trips by 7,149. A distance of zero and a number of autos owned also equal to zero corresponds with 51,601 total person trips, which is likely unrealistic. The R squared value of 0.965 and adjusted R-squared value of 0.9563 indicate that almost all variance in total person trips is accounted for by the two independent variables. 
+
+c)
+
+```{r}
+library(ggplot2)
+ggplot(data = problem1, aes(x = Linear.distance.to.the.cbd, y = Total.Person.Trips)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+    labs(x = "Linear Distance to the CBD (Miles)", y = "Total Person Trips (1000s)", title = "Total Person Trips and Distance")
+```
+```{r}
+library(ggplot2)
+ggplot(data = problem1, aes(x = number.of.autos.owned, y = Total.Person.Trips)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+    labs(x = "Number of Autos Owned (1000s)", y = "Total Person Trips (1000s)", title = "Total Person Trips and Distance")
+```
+It appears that the relationship between number of autos owned and total person trips is much stronger than the other one.
+
+d)
+H0: B1 and B2 are both zero
+H1: At least one B is not zero
+
+Significance Level = 0.05
+
+F-statistic
+
+Reject the null hypothesis since at least one independent variable affects total person trips per 1000.
+
+h0: B1 = 0
+H1: B1 != 0
+
+0.01, t-test
+
+H0: B2 = 0
+H1: B2 != 0
+
+0.01, t-test
+
+e)
+```{r}
+par(mfrow=c(2,2))
+plot(lmTrips)
+```
+Residuals vs Fitted: This plot illustrates that most of the points do not appear to follow any trends.
+
+Normal Q-Q: This plot contains nearly all of the points on the line, which indicates a normal probability distribution and satisfaction of homoscedasticity necessary for linearity.
+
+Scale-Location: This plot indicates that variation about the regression line is not constant for most values.
+
+Residuals vs Leverage: This plot indicates there are many outliers.
+
+
+f)
+```{r}
+51.601 - 10.122 * 8.9 + 7.149 * 15
+
+```
+
+```{r}
+51.601 - 10.122 * 8.2 + 7.149 * 18
+```
+Both of these predictions are reasonable and do not seem to contradict our real-life knowledge of these situations.
+
+g)
+```{r}
+library(ggplot2)
+51.601 - 10.122 * 62.4 + 7.149 * 600
+```
+
+```{r}
+boxplot(problem1$Linear.distance.to.the.cbd, data=problem1, main="Distance Data",
+   ylab="Linear Distance to the CBD (Miles)")
+```
+```{r}
+boxplot(problem1$number.of.autos.owned, data=problem1, main="Auto Data",
+   ylab="Number of Autos Owned (1000s)")
+```
+The predictions are still reliable even though the values plugged into our prediction function are outside the scope of the box plot for the two variables.
+
+### **Problem 2**
+
+
+```{r}
+fileBikeShare <- file.path(root_dir,"data","BikeShare.csv")
+bikeshare <- read.csv(fileBikeShare)
+
+bikeshare$sum <- as.factor(ifelse(bikeshare$season==1, 1, 0))
+bikeshare$fall <- as.factor(ifelse(bikeshare$season==2, 1, 0))
+bikeshare$win <- as.factor(ifelse(bikeshare$season==3, 1, 0))
+
+str(bikeshare)
+```
+
+(a)
+```{r}
+lmBikeShare <- lm(cnt ~ t1+t2+hum+wind_speed+sum+fall+win, data=bikeshare)
+summary.lm(lmBikeShare)
+```
+cnt = 2937.541 + 85.761 * t1 + -26.672 * t2 + -17.383 * hum + -7.103 * wind_speed + 30.104 * sum + 203.687 * fall + -98.527 * win
+
+The adjusted R-squared value of 0.1926 indicates that 19.26 percent of the variation in the new bike shares 
+data can be explained by the various independent variables.
+
+The residual standard error of 1070 indicates that there is an average error of 1070 bike shares when predicting the dependent variable 
+
+The coefficient for real temperature(t1) is 85.761 and indicates a positive relationship. As the real temperature increases by 1 degree (Celsius), bike share is expected to increase by 85.761
+
+The regression of coefficient for feels like temperature(t2) is -26.672 and indicates a negative relationship. As the feels like temperature value increases by 1 degree, bike share decreases by -26.672.
+
+The regression of coefficient for humidity(hum) is -17.383. As the humidity increases by 1 percent, bike share is expected 
+to decrease by 17.383.
+
+The regression of coefficient for wind speed(wind speed) is -7.103. As the wind speed increases 1 km/h, bike share is 
+expected to decrease by 7.103
+
+The regression of coefficient for season summer(sum) is 30.104. During the summer season bike share is expected to increase
+by 30.104.
+
+The regression of coefficient for season fall(fall) is 203.687. During the fall season bike share is expected to increase
+by 203.687.
+
+The regression of coefficient for season winter(win) is -98.527. During the winter season bike share is expected to increase
+by -98.527.
+
+b)
+HO: All coefficients = 0
+H1: At least one is not zero
+F-test, .05 level
+Reject null if F>2.01
+F = 122.7, reject H0
+
+HO: Each individual predictor is zero
+H1: Each individual one is not
+t, .05
+Reject if |t|>1.960
+
+t1 t=-11.043, reject
+sum t=0.472, fail to reject
+sum t--1.804, fail to reject
+win t=
+
+c)
+```{r}
+par(mfrow=c(2,2))
+plot(lmBikeShare)
+```
+
+d)
+```{r}
+DescTools::CoefVar(lmBikeShare)
+```
+
+```{r}
+effectsize::standardize_parameters(lmBikeShare)
+```
+
+```{r}
+DescTools::VIF(lmBikeShare)
+```
+```{r}
+effectsize::interpret_vif(DescTools::VIF(lmBikeShare))
+```
+
+e)
+```{r}
+lmBikeShare2 <- lm(cnt ~ t1+t2+hum+wind_speed+sum+fall+win+t1*t2, data=bikeshare)
+summary(lmBikeShare2)
+
+```
+
+f)
+```{r}
+lmBikeShare3 <- lm(cnt ~ t2+sum+win, data=bikeshare)
+summary(lmBikeShare3)
+```
+
+### **Problem 3**
+```{r}
+root_dir <- here::here()
+filewildcats <- file.path(root_dir,"data","wildcats.csv")
+wildcats <- read.csv(filewildcats)
+str(wildcats)
+```
+a)
+
+```{r}
+Wild <- lm(Wildcats~Price+Output+GNP+Time, data=wildcats)
+summary(Wild)
+```
+wildcats = -9.799 +  2.700 * Price + 3.045 * Output + -0.016 * GNP + -0.0233 * Time
+
+Adjusted R-sq value: 51.35% of variation in wildcat 
+data can be explained by our model based on all the independent variables involved.
+
+Residual standard error: average error of 1.643 in predicting the dependent variable.
+
+The regression of coefficient for Price is 2.700 and shows positive relationship. As the price per barrel in constant dollars increases wildcat
+wells would increase by 2.700.
+
+The regression of coefficient for Output is 3.045 and shows positive relationship. As the production output increases by 1 million barrels of oil  
+wildcats wells is expected to increase by 3.045.
+
+The regression of coefficient for **GNP** is -0.016 and shows negative 
+relationship. As the Gross National Product increases by 1 billion, wildcat well
+is expected to decrease by -0.016.
+
+The regression of coefficient for **Time** is -0.0233 and shows 
+negative relationship. With the time as technology change, wildcat well
+is expected to decrease by -0.0233.
+
+b)
+```{r}
+DescTools::CoefVar(Wild)
+effectsize::standardize_parameters(Wild)
+```
+
+
+
+### **Problem 4**
+```{r}
+root_dir <- here::here()
+filegss <- file.path(root_dir,"data","gss_2.csv")
+gss <- read.csv(filegss)
+```
+
+a)
+
+```{r}
+collist1 <- c('HEALTH','SMOKE','EDUC','PAEDUC','MAEDUC','CLASS','AGE','HAPPY',
+          'REALINC','TVHOURS','SEXFREQ')
+
+collist2 <- c('HEALTH','SMOKE','EDUC','PAEDUC','MAEDUC','CLASS','AGE','HAPPY',
+              'REALINC','TVHOURS','SEXFREQ','POVLINE','REALRINC','TIMEPDWK',
+              'TIMEFAM','HELPSICK','INCOME','PRESTIGE')
+
+str(gss[collist2])
+
+```
+b)
+```{r}
+str(gss_new[collist3])
+
+ModelA <- lm(formula = HEALTH~ SMOKE + EDUC + PAEDUC + MAEDUC + CLASS + AGE + 
+               HAPPY + REALINC + TVHOURS + SEXFREQ + INCOME + LEANDEM + INDEP, data=gss_new)
+
+summary(ModelA)
+```
+
+
